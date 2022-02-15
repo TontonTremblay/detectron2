@@ -104,36 +104,39 @@ if __name__ == "__main__":
 
     if args.input:
         if len(args.input) == 1:
-            args.input = glob.glob(os.path.expanduser(args.input[0]))
+            args.input = sorted(glob.glob(os.path.expanduser(args.input[0])))
             assert args.input, "The input path(s) was not found"
         for path in tqdm.tqdm(args.input, disable=not args.output):
             # use PIL, to be consistent with evaluation
             img = read_image(path, format="BGR")
+            # print(img.shape)
+            # raise()
             start_time = time.time()
             predictions, visualized_output = demo.run_on_image(img)
-            logger.info(
-                "{}: {} in {:.2f}s".format(
-                    path,
-                    "detected {} instances".format(len(predictions["instances"]))
-                    if "instances" in predictions
-                    else "finished",
-                    time.time() - start_time,
-                )
-            )
+            # logger.info(
+            #     "{}: {} in {:.2f}s".format(
+            #         path,
+            #         "detected {} instances".format(len(predictions["instances"]))
+            #         if "instances" in predictions
+            #         else "finished",
+            #         time.time() - start_time,
+            #     )
+            # )
 
-            if args.output:
-                if os.path.isdir(args.output):
-                    assert os.path.isdir(args.output), args.output
-                    out_filename = os.path.join(args.output, os.path.basename(path))
-                else:
-                    assert len(args.input) == 1, "Please specify a directory with args.output"
-                    out_filename = args.output
-                visualized_output.save(out_filename)
-            else:
-                cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-                cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
-                if cv2.waitKey(0) == 27:
-                    break  # esc to quit
+            # if args.output:
+            #     if os.path.isdir(args.output):
+            #         assert os.path.isdir(args.output), args.output
+            #         out_filename = os.path.join(args.output, os.path.basename(path))
+            #     else:
+            #         assert len(args.input) == 1, "Please specify a directory with args.output"
+            #         out_filename = args.output
+            #     visualized_output.save(out_filename)
+            # else:
+            #     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
+            #     cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
+            #     if cv2.waitKey(0) == 27:
+            #         break  # esc to quit
+
     elif args.webcam:
         assert args.input is None, "Cannot have both --input and --webcam!"
         assert args.output is None, "output not yet supported with --webcam!"

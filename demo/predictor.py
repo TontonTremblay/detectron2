@@ -10,7 +10,7 @@ from detectron2.data import MetadataCatalog
 from detectron2.engine.defaults import DefaultPredictor
 from detectron2.utils.video_visualizer import VideoVisualizer
 from detectron2.utils.visualizer import ColorMode, Visualizer
-
+import pickle
 
 class VisualizationDemo(object):
     def __init__(self, cfg, instance_mode=ColorMode.IMAGE, parallel=False):
@@ -49,6 +49,8 @@ class VisualizationDemo(object):
         predictions = self.predictor(image)
         # Convert image from OpenCV BGR format to Matplotlib RGB format.
         image = image[:, :, ::-1]
+        frame = image
+
         visualizer = Visualizer(image, self.metadata, instance_mode=self.instance_mode)
         if "panoptic_seg" in predictions:
             panoptic_seg, segments_info = predictions["panoptic_seg"]
@@ -63,6 +65,20 @@ class VisualizationDemo(object):
             if "instances" in predictions:
                 instances = predictions["instances"].to(self.cpu_device)
                 vis_output = visualizer.draw_instance_predictions(predictions=instances)
+
+                vis_output_t = vis_output.get_image()
+                cv2.imwrite(f"output/{str(self.i_frame).zfill(4)}.png",cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+                # Converts Matplotlib RGB format to OpenCV BGR format
+
+                # print(vis_output.get_image())
+                # raise()
+                # vis_output_t = cv2.cvtColor(vis_output_t.get_image(), cv2.COLOR_RGB2BGR)
+                cv2.imwrite(f"output/{str(self.i_frame).zfill(4)}_p.png",cv2.cvtColor(vis_output_t, cv2.COLOR_BGR2RGB))
+                # predictions
+                # raise()
+                pickle.dump(predictions, open( f"output/{str(self.i_frame).zfill(4)}.p", "wb" ) )
+                self.i_frame += 1
 
         return predictions, vis_output
 
@@ -114,7 +130,7 @@ class VisualizationDemo(object):
             # Converts Matplotlib RGB format to OpenCV BGR format
             vis_frame = cv2.cvtColor(vis_frame.get_image(), cv2.COLOR_RGB2BGR)
             cv2.imwrite(f"output/{str(self.i_frame).zfill(4)}_p.png",cv2.cvtColor(vis_frame, cv2.COLOR_BGR2RGB))
-            predictions
+            # predictions
             pickle.dump( predictions, open( f"output/{str(self.i_frame).zfill(4)}.p", "wb" ) )
 
             self.i_frame += 1
